@@ -1,0 +1,88 @@
+<!doctype html>
+<!--
+/*************************************************************************
+* ADOBE CONFIDENTIAL
+* ___________________
+*
+* Copyright 2020 Adobe
+* All Rights Reserved.
+*
+* NOTICE: Adobe permits you to use, modify, and distribute this file in
+* accordance with the terms of the Adobe license agreement accompanying
+* it. If you have received this file from a source other than Adobe,
+* then your use, modification, or distribution of it requires the prior
+* written permission of Adobe. 
+**************************************************************************/
+-->
+<html>
+<title>Play Video in Timeline</title>
+<head>
+	<meta charset="utf-8">
+	<script src="./lib/CSInterface.js"></script>
+	<script src="./lib/jquery-1.9.1.js"></script>
+	<script src="./lib/Vulcan.js"></script>
+	<link id="ppstyle" href="css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body style="overflow: none; color: white; background-color: black；">
+	<a href="javascript:history.go(0)">Refresh</a>
+	<div style="font-size: x-small">
+		<p>Full path of an input file: <input type="text" id="file-name"></input></p>
+		<p>Width: <input type="number" id="width" min="1" value="40"></input></p>
+		<p>Height: <input type="number" id="height" min="1" value="30"></input></p>
+		<p>Timeline Length (secs): <input type="number" id="length" min="1" value="10"></input></p>
+		<p>Number of Frames: <input type="number" id="frame-count" min="1" value="50"></input></p>
+		<p>Frame duration (msec): <input type="number" id="duration" min="1" value="10000"></input></p>
+	</div>
+	<p style="color: white;"><button class="controlBg textStyle" id="btn_play" onClick="loadBadApple()">Play</button></p>
+	<p style="color: white; font-size: 10px;"><span id="frame-no">0</span>/<span id="frame-total">0</span>, time elapsed: <span id="elapsed">0</span>&nbsp;ms.</p>
+</body>
+<script type="text/javascript">
+
+	var frameDuration;
+	var totalFrames;
+	var csInterface = new CSInterface();
+
+	function loadBadApple() {
+		// C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PlayBadAppleOnTimeline\badapple.txt
+		var fname = $("#file-name").val();
+		fname = fname.replaceAll("\\", "\\\\");
+		var width = $("#width").val();
+		var height = $("#height").val();
+		var length = $("#length").val();
+		var fcount = $("#frame-count").val();
+		var duration = $("#duration").val();
+		csInterface.evalScript(`loadBadApple('${fname}', ${width}, ${height}, ${length}, ${fcount}, ${duration})`, function (res) {
+			csInterface.evalScript("FRAME_COUNT", function (res) {
+				totalFrames = res;
+				csInterface.evalScript("FRAME_DURATION", function (res) {
+					frameDuration = res;
+					$("#frame-total").text(totalFrames);
+					$("#btn_play").attr("disabled", "disabled");
+					playBadApple();
+				});
+			});
+		});
+	}
+
+	var frameId = 0;
+	var startTime = 0;
+
+	function playBadApple() {
+		if (startTime == 0) {
+			startTime = Date.now()
+		}
+		if (frameId < totalFrames) {
+			frameId++;
+			$("#frame-no").text(frameId);
+			csInterface.evalScript("renderFrame()", function (res) {
+				var nowTime = Date.now() - startTime;
+				var timeElapsed = nowTime - (frameId-1)*frameDuration;
+				$("#elapsed").text(timeElapsed);
+				var sleepTime = Math.max(10, frameId*frameDuration - nowTime);
+				setTimeout(playBadApple, sleepTime);
+			});
+		}
+	}
+</script>
+</html>
