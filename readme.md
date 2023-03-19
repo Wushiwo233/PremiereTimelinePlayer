@@ -4,6 +4,8 @@ This is a practice of Adobe Premiere Scripting and by-product for my other proje
 
 This script will automatically place clips of different colors to the timeline and "render" an image sequence, like playing a video. A demo video can be found [here](https://www.bilibili.com/video/BV1bP411Z7uk/).
 
+[中文文档](https://github.com/Wushiwo233/PremiereTimelinePlayer/blob/master/readme-zh.md)
+
 ## How to use
 
 1. Obtain an Adobe Premiere Pro.
